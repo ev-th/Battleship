@@ -2,29 +2,98 @@ require 'game'
 require 'board'
 require 'ship'
 
-# place ship adds a ship to the player's board
 
-# place ship removes ship from player's board's unplaced ships
+describe "Game integration" do
+  context "initially" do
+    xit "has two player names" do
+    end
 
-# place ship adds ship to player's board's placed_ships
+    xit "has a board associated with each player" do
+    end
+  end
 
-# placing a ship outside the bounds of the board throws an error
+  describe "#place_ship" do
+    context "when a ship is placed on valid coordinates of the player board" do
+      xit "updates the board" do
+      end
 
-# placing a ship on another ship throws an error by Board which is caught by Game
+      xit "moves the ship to placed_ships" do
+      end
 
+      xit "removes the ship from unplaced_ships" do
+      end
+    end
+    
+    context "when a ship is placed out of bounds" do
+      xit "fails" do
+      end
+    end
 
-# shoot adds shot to opponents board
+    context "when a ship is placed on top of another ship on the player board" do
+      xit "fails" do
+      end
+    end
+  end
 
-# When attempting to hit the same spot, fails
+  describe "#shoot" do
+    context "when passed a coordinate that has not been hit on the opponent's board" do
+      xit "records the hit on the opponent's board" do
+      end
+      
+      context "when a ship is found at that coordinate" do
+        xit "damages the ship" do
+        end
+        
+        context "if the ship is partially damaged" do
+          xit "returns a value to indicate a hit" do
+          end
+        end
+        
+        context "if the ship is sunk" do
+          xit "returns a value to indicate a ship has been sunk" do
+          end
+        end
+      end
 
-# When attempting to hit invalid coordinate(eg. ouside the board), fails
+      context "when a ship is not found at that coordinate" do
+        xit "makes no change to the opponent's ships" do
+        end
 
-# shoot damages a hit ship
+        xit "returns a value to indicate a miss" do
+        end
+      end
+    end
 
-# shoot returns result with successful hit
+    context "when passed a coordinate that has already been hit on the opponent's board" do
+      xit "fails" do
+      end
+    end
 
-# shoot returns result when sinking a battleship.
+    context "when passed a coordinate that is invalid" do
+      xit "fails" do
+      end
+    end
+  end
 
-# shoot returns result with unsuccessful hit
+  describe "#get_player_board" do
+    context "when 'p1' is current_player and 'p2' is current_opponent" do
+      xit "gets the board associated with the p1" do
+      end
 
-# shoot makes no changes to ships with a miss
+      context "then active player is switched" do
+        xit "gets the board associated with the p2"
+      end
+    end
+  end
+
+  describe "#get_opponent_board" do
+    context "when 'p1' is current_player and 'p2' is current_opponent" do
+      xit "gets the board associated with the p2" do
+      end
+
+      context "then active player is switched" do
+        xit "gets the board associated with the p1"
+      end
+    end
+  end
+end
