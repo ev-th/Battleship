@@ -5,7 +5,8 @@ require 'ship'
 
 describe "Game integration" do
   context "initially" do
-    xit "has two player names" do
+    it "has two player names" do
+
     end
 
     xit "has a board associated with each player" do
@@ -30,6 +31,11 @@ describe "Game integration" do
     end
 
     context "when a ship is placed on top of another ship on the player board" do
+      xit "fails" do
+      end
+    end
+
+    context "when the ship is not available to place" do
       xit "fails" do
       end
     end
