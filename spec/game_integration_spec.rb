@@ -8,8 +8,8 @@ describe "Game integration" do
       board_1 = Board.new([])
       board_2 = Board.new([])
       game = Game.new(board_1, board_2)
-      expect(game.current_player_board).to eq board_1
-      expect(game.current_opponent_board).to eq board_2
+      expect(game.player_board).to eq board_1
+      expect(game.opponent_board).to eq board_2
     end
   end
 
@@ -115,7 +115,7 @@ describe "Game integration" do
           [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
         ]
         
-        result = game.current_opponent_board.grid
+        result = game.opponent_board.grid
         expect(result).to eq expected_grid
       end
       
@@ -201,26 +201,62 @@ describe "Game integration" do
       end
     end
   end
+  
+  describe "#switch_active_player" do
+    it "switches the boards" do
+      ship_1 = Ship.new(2)
+      ship_2 = Ship.new(3)
+      board_1 = Board.new([ship_1, ship_2])
 
-  describe "#get_player_board" do
-    context "when 'p1' is current_player and 'p2' is current_opponent" do
-      xit "gets the board associated with the p1" do
-      end
+      ship_3 = Ship.new(3)
+      ship_4 = Ship.new(4)
+      board_2 = Board.new([ship_3, ship_4])
 
-      context "then active player is switched" do
-        xit "gets the board associated with the p2"
-      end
-    end
-  end
+      game = Game.new(board_1, board_2)
 
-  describe "#get_opponent_board" do
-    context "when 'p1' is current_player and 'p2' is current_opponent" do
-      xit "gets the board associated with the p2" do
-      end
+      game.place_ship(2, "A1", "horizontal")
+      game.place_ship(3, "C1", "vertical")
+      game.switch_active_player
+      
+      game.place_ship(3, "D6", "horizontal")
+      game.place_ship(4, "B10", "horizontal")
+      game.switch_active_player
+      
+      game.shoot("A1")
+      game.switch_active_player
+      game.shoot("A1")
+      game.switch_active_player
+      game.shoot("c10")
 
-      context "then active player is switched" do
-        xit "gets the board associated with the p1"
-      end
+      
+      expected_grid_1 = [
+        [{ship: ship_1, hit: true}, {ship: ship_1, hit: false}, {ship: ship_2, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: ship_2, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: ship_2, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
+      ]
+
+      expected_grid_2 = [
+        [{ship: nil, hit: true}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: ship_3, hit: false}, {ship: ship_3, hit: false}, {ship: ship_3, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: ship_4, hit: false}, {ship: ship_4, hit: false}, {ship: ship_4, hit: false}, {ship: ship_4, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
+      ]
+
+      expect(board_1.grid).to eq expected_grid_1
+
     end
   end
 end
