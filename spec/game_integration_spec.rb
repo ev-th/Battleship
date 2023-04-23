@@ -94,44 +94,110 @@ describe "Game integration" do
       end
     end
   end
-
+  
   describe "#shoot" do
     context "when passed a coordinate that has not been hit on the opponent's board" do
-      xit "records the hit on the opponent's board" do
+      it "records the hit on the opponent's board" do
+        board_1 = Board.new([])
+        board_2 = Board.new([])
+        game = Game.new(board_1, board_2)
+        game.shoot("A1")
+        expected_grid = [
+          [{ship: nil, hit: true}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+          [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
+        ]
         
+        result = game.current_opponent_board.grid
+        expect(result).to eq expected_grid
       end
       
       context "when a ship is found at that coordinate" do
-        xit "damages the ship" do
+        it "damages the ship" do
+          ship = Ship.new(3)
+          board_1 = Board.new([])
+          board_2 = Board.new([ship])
+          board_2.place_ship(3, "A1", "horizontal")
+          game = Game.new(board_1, board_2)
+          game.shoot("A1")
+          expect(ship.damage).to eq 1
         end
         
         context "if the ship is partially damaged" do
-          xit "returns a value to indicate a hit" do
+          it "returns a value to indicate a hit" do
+            ship = Ship.new(3)
+            board_1 = Board.new([])
+            board_2 = Board.new([ship])
+            board_2.place_ship(3, "A1", "horizontal")
+            game = Game.new(board_1, board_2)
+            result = game.shoot("A1")
+            expect(result).to eq "hit"
           end
         end
         
         context "if the ship is sunk" do
-          xit "returns a value to indicate a ship has been sunk" do
+          it "returns a value to indicate a ship has been sunk" do
+            ship = Ship.new(3)
+            board_1 = Board.new([])
+            board_2 = Board.new([ship])
+            board_2.place_ship(3, "A1", "horizontal")
+            game = Game.new(board_1, board_2)
+            game.shoot("A1")
+            game.shoot("B1")
+            result = game.shoot("C1")
+            expect(result).to eq "sunk"
           end
         end
       end
-
+      
       context "when a ship is not found at that coordinate" do
-        xit "makes no change to the opponent's ships" do
+        it "makes no change to the opponent's ships" do
+          ship = Ship.new(3)
+          board_1 = Board.new([])
+          board_2 = Board.new([ship])
+          board_2.place_ship(3, "C3", "horizontal")
+          game = Game.new(board_1, board_2)
+          game.shoot("A1")
+          expect(ship.damage).to eq 0
         end
-
-        xit "returns a value to indicate a miss" do
+        
+        it "returns a value to indicate a miss" do
+          board_1 = Board.new([])
+          board_2 = Board.new([])
+          game = Game.new(board_1, board_2)
+          result = game.shoot("B1")
+          expect(result).to eq "miss"
         end
       end
     end
-
+    
     context "when passed a coordinate that has already been hit on the opponent's board" do
-      xit "fails" do
+      it "fails" do
+        board_1 = Board.new([])
+        board_2 = Board.new([])
+        game = Game.new(board_1, board_2)
+        game.shoot("A1")
+        expect {
+          game.shoot("A1")
+        }.to raise_error "This location has already been shot."
       end
     end
-
+    
     context "when passed a coordinate that is invalid" do
-      xit "fails" do
+      it "fails" do
+        board_1 = Board.new([])
+        board_2 = Board.new([])
+        game = Game.new(board_1, board_2)
+        expect {
+          game.shoot("K1")
+        }.to raise_error "This is an invalid coordinate."
       end
     end
   end
