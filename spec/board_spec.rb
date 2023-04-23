@@ -19,9 +19,11 @@ RSpec.describe Board do
       expect(board.grid).to eq expected_grid
     end
 
-    it "#all_ships_sunk? returns false" do
-      board = Board.new([])
-      expect(board.all_ships_sunk?).to eq false
+    describe "#all_ships_sunk?" do
+      it "fails" do
+        board = Board.new([])
+        expect { board.all_ships_sunk? }.to raise_error "There are no ships on the board."
+      end
     end
 
     context "when passed an empty array" do
@@ -331,6 +333,120 @@ RSpec.describe Board do
           [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
         ]
         expect(board.grid).to eq expected_grid
+      end
+    end
+  end
+
+  describe "#receive_shot" do
+    context "when passed invalid coordinate" do
+      it "fails" do
+        board = Board.new([])
+        expect {
+          board.receive_shot("H12")
+        }.to raise_error "This is an invalid coordinate."
+      end
+    end
+
+    context "when passed a previously shot coordinate" do
+      it "fails" do
+        board = Board.new([])
+        board.receive_shot("G6")
+        expect {
+          board.receive_shot("G6")
+        }.to raise_error "This location has already been shot."
+      end
+    end
+    
+    it "updates the grid with the shot" do
+      board = Board.new([])
+      board.receive_shot("B9")
+      expected_grid = [
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: true}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
+        [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
+      ]
+      expect(board.grid).to eq expected_grid
+    end
+
+    context "when hits a ship" do
+      it "damages the ship" do
+        fake_ship = double :fake_ship, length: 3, hit: nil, sunk?: false
+        expect(fake_ship).to receive(:hit)
+        board = Board.new([fake_ship])
+        board.place_ship(3, "A5", "horizontal")
+        board.receive_shot("C5")
+      end
+      
+      context "when it partially damages the ship" do
+        it "returns 'hit'" do
+          fake_ship = double :fake_ship, length: 3, hit: nil, sunk?: false
+          board = Board.new([fake_ship])
+          board.place_ship(3, "A5", "horizontal")
+          result = board.receive_shot("C5")
+          expect(result).to eq "hit"
+        end
+      end
+      
+      context "when it fully damages the ship" do
+        it "returns 'sunk'" do
+          fake_ship = double :fake_ship, length: 3, hit: nil, sunk?: true
+          board = Board.new([fake_ship])
+          board.place_ship(3, "A5", "horizontal")
+          result = board.receive_shot("C5")
+          expect(result).to eq "sunk"
+        end
+      end
+    end
+    
+    context "when it misses a ship" do
+      it "returns 'miss'" do
+        fake_ship = double :fake_ship, length: 3, hit: nil, sunk?: false
+        board = Board.new([fake_ship])
+        board.place_ship(3, "A5", "horizontal")
+        result = board.receive_shot("A2")
+        expect(result).to eq "miss"
+      end
+    end
+  end
+
+  describe "#all_ships_sunk?" do
+    context "when all placed ships are not sunk" do
+      it "returns false" do
+        fake_ship_1 = double :fake_ship_1, length: 2, sunk?: false
+        fake_ship_2 = double :fake_ship_2, length: 1, sunk?: false
+        board = Board.new([fake_ship_1, fake_ship_2])
+        board.place_ship(2, "A1", "horizontal")
+        board.place_ship(1, "D6", "vertical")
+        expect(board.all_ships_sunk?).to eq false
+      end
+    end
+
+    context "when some placed ships are sunk" do
+      it "returns false" do
+        fake_ship_1 = double :fake_ship_1, length: 2, sunk?: false
+        fake_ship_2 = double :fake_ship_2, length: 1, sunk?: true
+        board = Board.new([fake_ship_1, fake_ship_2])
+        board.place_ship(2, "A1", "horizontal")
+        board.place_ship(1, "D6", "vertical")
+        expect(board.all_ships_sunk?).to eq false
+      end
+    end
+
+    context "when all placed ships are sunk" do
+      it "returns true" do
+        fake_ship_1 = double :fake_ship_1, length: 2, sunk?: true
+        fake_ship_2 = double :fake_ship_2, length: 1, sunk?: true
+        board = Board.new([fake_ship_1, fake_ship_2])
+        board.place_ship(2, "A1", "horizontal")
+        board.place_ship(1, "D6", "vertical")
+        expect(board.all_ships_sunk?).to eq true
       end
     end
   end

@@ -8,26 +8,11 @@ class Board
   end
 
   def place_ship(ship_length, start_position, orientation)
-    available_ship_lengths = @unplaced_ships.map(&:length)
-    unless available_ship_lengths.include?(ship_length)
+    unless @unplaced_ships.map(&:length).include?(ship_length)
       fail "There are no ships of this length available to place."
     end
 
-    valid_columns = [
-      "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 
-    ]
-    column = start_position[0]
-    unless valid_columns.include? column
-      fail "This is an invalid coordinate."
-    end
-
-    row = start_position[1..-1]
-    unless row.match(/[0-9]+/)
-      fail "This is an invalid coordinate."
-    end
-
-    unless row.to_i <= 10
+    unless is_valid_coordinates?(start_position)
       fail "This is an invalid coordinate."
     end
 
@@ -35,8 +20,7 @@ class Board
       fail "This is an invalid orientation."
     end
 
-    column_index = start_position[0].upcase.ord - 65
-    row_index = start_position[1..-1].to_i - 1
+    row_index, column_index = convert_coordinates(start_position)
 
     if orientation == "vertical"
       last_row_index = row_index + ship_length - 1
@@ -75,11 +59,26 @@ class Board
     end
   end
 
-  def receive_shot
+  def receive_shot(coordinates)
+    fail "This is an invalid coordinate." unless is_valid_coordinates?(coordinates)
+
+    row_index, column_index = convert_coordinates(coordinates)
+    grid_location = @grid[row_index][column_index]
+
+    fail "This location has already been shot." if grid_location[:hit]
+
+    grid_location[:hit] = true
+
+    ship = grid_location[:ship]
+    return "miss" if ship.nil?
+
+    ship.hit
+    ship.sunk? ? "sunk" : "hit"
   end
 
   def all_ships_sunk?
-    false
+    fail "There are no ships on the board." if @placed_ships.empty?
+    @placed_ships.all?(&:sunk?)
   end
 
   private
@@ -98,17 +97,20 @@ class Board
       [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
     ]
   end
-end
 
-# [
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}],
-#   [{ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}, {ship: nil, hit: false}]
-# ]
+  def is_valid_coordinates?(coordinates)
+    valid_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    column = coordinates[0].upcase
+
+    valid_rows = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    row = coordinates[1..-1]
+
+    valid_columns.include?(column) && valid_rows.include?(row)
+  end
+
+  def convert_coordinates(coordinates)
+    column_index = coordinates[0].upcase.ord - 65
+    row_index = coordinates[1..-1].to_i - 1
+    [row_index, column_index]
+  end
+end
